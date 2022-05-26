@@ -4,6 +4,7 @@
 @homepage : https://github.com/gusdnd852
 """
 from torch import nn
+import math
 
 from models.embedding.positional_encoding import PostionalEncoding
 from models.embedding.token_embeddings import TokenEmbedding
@@ -23,11 +24,13 @@ class TransformerEmbedding(nn.Module):
         :param d_model: dimensions of model
         """
         super(TransformerEmbedding, self).__init__()
+        self.d_model = d_model
         self.tok_emb = TokenEmbedding(vocab_size, d_model)
         self.pos_emb = PostionalEncoding(d_model, max_len, device)
         self.drop_out = nn.Dropout(p=drop_prob)
 
     def forward(self, x):
         tok_emb = self.tok_emb(x)
+        tok_emb = tok_emb * math.sqrt(self.d_model)
         pos_emb = self.pos_emb(x)
         return self.drop_out(tok_emb + pos_emb)
